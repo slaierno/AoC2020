@@ -13,7 +13,7 @@ int main() {
         }
     }
     const std::regex pieces_regex("(\\d+)-(\\d+) (\\w): (\\w+)");
-    unsigned valid_cnt = std::ranges::count_if(input, [pieces_regex](auto password) {
+    const unsigned valid_cnt = std::ranges::count_if(input, [pieces_regex](auto password) {
         std::smatch match;
         std::regex_match(password, match, pieces_regex);
         const auto&& [min, max, rep_ch, psw] = std::tuple{std::stoul(match[1]), std::stoul(match[2]), match[3].str()[0], match[4].str()};
