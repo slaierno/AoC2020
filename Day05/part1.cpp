@@ -1,27 +1,11 @@
 //822
-#include <vector>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <algorithm>
 #include <numeric>
-#include <map>
-#include <execution>
+#include <range/v3/all.hpp>
 
-namespace ranges = std::ranges;
-auto split(std::string to_split, const std::vector<std::string>& delimiters) {
-    std::vector<std::string> ret;
-    for(size_t pos = 0; pos != std::string::npos;) {
-        std::vector<size_t> findings(delimiters.size());
-        ranges::transform(delimiters, std::begin(findings), [&to_split](auto d){ return to_split.find(d);});
-        auto it = ranges::min_element(findings);
-        auto delimiter = delimiters.at(std::distance(std::begin(findings), it));
-        pos = *it;
-        ret.push_back(to_split.substr(0,pos));
-        if(pos != std::string::npos) to_split.erase(0, pos + delimiter.size());
-    }
-    return ret;
-}
+namespace views = ranges::views;
 
 struct seat {
     unsigned row, col;
@@ -34,17 +18,21 @@ struct range {
 };
 
 int main() {
-    const auto input = []() -> std::vector<std::string> {
+    const auto input = []() {
         if(std::ifstream input_file("input.txt"); input_file.is_open()) {
             std::stringstream buffer;
             buffer << input_file.rdbuf();
-            return split(buffer.str(), {"\n"});
-        } else return {};
+            const auto s = buffer.str();
+            return ranges::to<std::vector<std::string>>(
+                  views::all(s)
+                | views::split('\n')
+                | views::transform(ranges::to<std::string>())
+            );
+        } else throw "Invalid input\n";
     }();
-    unsigned highest = 0;
-    for(const auto& i : input) {
+    const auto ticket_to_id = [](auto ticket) {
         range<seat> s {{0,0}, {127,7}};
-        for(const auto c : i) {
+        for(const auto c : ticket) {
             switch(c) {
             case 'L':
                 s.high.col = (s.low.col + s.high.col)/2;
@@ -60,12 +48,8 @@ int main() {
                 break;
             }
         }
-        if(s.high.row != s.low.row || s.high.col != s.low.col) {
-            std::cout << "WHOOOPS" << std::endl;
-            return -1;
-        }
-        highest = std::max(highest, s.high.row*8 + s.high.col);
+        return s.high.row*8 + s.high.col;
     };
-    std::cout << highest << std::endl;
+    std::cout << ranges::max(input | views::transform(ticket_to_id)) << std::endl;
     return 0;
 }
