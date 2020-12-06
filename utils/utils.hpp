@@ -6,7 +6,7 @@
 namespace AoC{
     namespace views = ranges::views;
 
-    auto split(std::string to_split, const std::vector<std::string>& delimiters) {
+    auto split(std::string to_split, const std::initializer_list<std::string>& delimiters) {
         std::vector<std::string> ret;
         for(size_t pos = 0; pos != std::string::npos;) {
             const auto it = ranges::min_element(delimiters, [&to_split](auto a, auto b){ return to_split.find(a) < to_split.find(b);});
@@ -17,32 +17,27 @@ namespace AoC{
         return ret;
     }
 
-    auto get_input(const std::string& filename, const std::vector<std::string>& delimiters) {
-        if(std::ifstream input_file(filename); input_file.is_open()) {
-            std::stringstream buffer;
-            buffer << input_file.rdbuf();
-            return AoC::split(buffer.str(), {"\n\n"});
-        } else throw "Invalid input\n";
-    };
+    auto split(std::string to_split, const std::string& delimiter) {
+        return AoC::split(to_split, {delimiter});
+    }
 
-    auto get_input(const std::string& filename, const char delimiter) {
+    auto split(std::string to_split, const char delimiter) {
+        return AoC::split(to_split, std::string(1, delimiter));
+    }
+
+    auto get_input(const std::string& filename, const std::initializer_list<std::string>& delimiters) {
         if(std::ifstream input_file(filename); input_file.is_open()) {
             std::stringstream buffer;
             buffer << input_file.rdbuf();
-            const auto s = buffer.str();
-            return ranges::to<std::vector<std::string>>(
-                  views::all(s)
-                | views::split(delimiter)
-                | views::transform(ranges::to<std::string>())
-            );
+            return AoC::split(buffer.str(), delimiters);
         } else throw "Invalid input\n";
     };
 
     auto get_input(const std::string& filename, const std::string& delimiter) {
-        if (delimiter.length() == 1) {
-            return AoC::get_input(filename, delimiter[0]);
-        } else {
-            return AoC::get_input(filename, {delimiter});
-        }
+        return AoC::get_input(filename, {delimiter});
     }
+
+    auto get_input(const std::string& filename, const char delimiter) {
+        return AoC::get_input(filename, std::string(1, delimiter));
+    };
 }
