@@ -1,4 +1,4 @@
-//705s
+//705
 #include <vector>
 #include <fstream>
 #include <iostream>
@@ -7,21 +7,9 @@
 #include <numeric>
 #include <map>
 #include <execution>
+#include <range/v3/all.hpp>
 
-namespace ranges = std::ranges;
-auto split(std::string to_split, const std::vector<std::string>& delimiters) {
-    std::vector<std::string> ret;
-    for(size_t pos = 0; pos != std::string::npos;) {
-        std::vector<size_t> findings(delimiters.size());
-        ranges::transform(delimiters, std::begin(findings), [&to_split](auto d){ return to_split.find(d);});
-        auto it = ranges::min_element(findings);
-        auto delimiter = delimiters.at(std::distance(std::begin(findings), it));
-        pos = *it;
-        ret.push_back(to_split.substr(0,pos));
-        if(pos != std::string::npos) to_split.erase(0, pos + delimiter.size());
-    }
-    return ret;
-}
+namespace views = ranges::views;
 
 struct seat {
     unsigned row, col;
@@ -38,14 +26,17 @@ int main() {
         if(std::ifstream input_file("input.txt"); input_file.is_open()) {
             std::stringstream buffer;
             buffer << input_file.rdbuf();
-            return split(buffer.str(), {"\n"});
+            const auto s = buffer.str();
+            return ranges::to<std::vector<std::string>>(
+                  views::all(s)
+                | views::split('\n')
+                | views::transform(ranges::to<std::string>())
+            );
         } else return {};
     }();
-    std::vector<bool> seatmap(8*128, false);
-    unsigned highest = 0;
-    for(const auto& i : input) {
+    const auto ticket_to_id = [](auto ticket) {
         range<seat> s {{0,0}, {127,7}};
-        for(const auto c : i) {
+        for(const auto c : ticket) {
             switch(c) {
             case 'L':
                 s.high.col = (s.low.col + s.high.col)/2;
@@ -61,28 +52,18 @@ int main() {
                 break;
             }
         }
-        if(s.high.row != s.low.row || s.high.col != s.low.col) {
-            std::cout << "WHOOOPS" << std::endl;
-            return -1;
-        }
-        unsigned id = s.high.row*8 + s.high.col;
-        highest = std::max(highest, id);
-        seatmap[id] = true;
+        return s.high.row*8 + s.high.col;
     };
-    std::cout << "highest: " << highest << std::endl;
-    bool found = false;
+    const std::vector<bool> seatmap = [&](){
+        std::vector<bool> seatmap(8*128, false);
+        ranges::for_each(input, [&](const auto& ticket){seatmap[ticket_to_id(ticket)] = true;});
+        return seatmap;
+    }();
     for(size_t i = 1; i < seatmap.size() - 1; i++) {
         if(!seatmap[i] && seatmap[i-1] && seatmap[i+1]) {
-            if(!found) {
-                found = true;
-            } else {
-                std::cout << "DUPLICATE?!" << std::endl;
-                return -1;
-            }
             std::cout << "free_id: " << i << std::endl;
-            return 0;
+            break;
         }
     }
-    std::cout << "No free ID?!" << std::endl;
-    return -1;
+    return 0;
 }
