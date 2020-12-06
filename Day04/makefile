@@ -1,8 +1,8 @@
 # CC = g++
 CC = /opt/gcc-latest/bin/g++
 
-CPPFLAGS     = -pthread -fconcepts -I../range-v3/include -std=gnu++20 -Wall -Werror -ltbb -Wl,-rpath,/opt/gcc-latest/lib64
-CPPFLAGS_OPT = -pthread -fconcepts -I../range-v3/include -std=gnu++20 -Wall -Werror -ltbb -Wl,-rpath,/opt/gcc-latest/lib64 -O3
+CPPFLAGS     = -pthread -fconcepts -I../range-v3/include -I../utils -std=gnu++20 -Wall -Werror -ltbb -Wl,-rpath,/opt/gcc-latest/lib64 -Wfatal-errors
+CPPFLAGS_OPT = -pthread -fconcepts -I../range-v3/include -I../utils -std=gnu++20 -Wall -Werror -ltbb -Wl,-rpath,/opt/gcc-latest/lib64 -O3
 
 p1: 
 	$(CC) -g part1.cpp -o part1 $(CPPFLAGS)
