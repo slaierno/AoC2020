@@ -11,7 +11,8 @@ namespace AoC{
         for(size_t pos = 0; pos != std::string::npos;) {
             const auto it = ranges::min_element(delimiters, [&to_split](auto a, auto b){ return to_split.find(a) < to_split.find(b);});
             pos = to_split.find(*it);
-            ret.push_back(to_split.substr(0,pos));
+            const auto token = to_split.substr(0,pos);
+            if(token.length() > 0) ret.push_back(token);
             if(pos != std::string::npos) to_split.erase(0, pos + it->size());
         }
         return ret;
