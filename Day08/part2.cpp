@@ -32,7 +32,7 @@ int main() {
         [&input](const auto& input_tuple){
             const auto [address_sub, op, arg] = input_tuple;
             
-            if(op != NOP && (op != JMP || (op == JMP && arg == 0))) return false;;
+            if(op != NOP && (op != JMP || (op == JMP && arg == 0))) return false;
             
             std::vector<bool> executed(input.size(), false);
             int acc = 0;
