@@ -26,27 +26,31 @@ int main() {
         const auto [op, arg] = str_to_inst(line);
         return std::tuple<size_t, op_enum, int>{i++, op, arg};
     });
-    std::any_of(std::execution::par_unseq, input.begin(), input.end(), [&input](auto& input_tuple){
-        const auto [address_sub, op, arg] = input_tuple;
-        
-        if(op != NOP && (op != JMP || (op == JMP && arg == 0))) return false;;
-        
-        std::vector<bool> executed(input.size(), false);
-        int acc = 0;
-        for(size_t address = 0; address < input.size();) {
-            auto [_, op, arg] = input[address];
-            if(!executed[address]) executed[address] = true;
-            else                   return false;
-            if(address == address_sub) op = (op == JMP) ? NOP : JMP;
-            switch(op){
-                case ACC: acc+= arg; address++;    break;
-                case NOP:            address++;    break;
-                case JMP:            address+=arg; break;
-                default: throw "Invalid opcode\n";
+    std::any_of(
+        std::execution::par_unseq, 
+        input.begin(), input.end(), 
+        [&input](const auto& input_tuple){
+            const auto [address_sub, op, arg] = input_tuple;
+            
+            if(op != NOP && (op != JMP || (op == JMP && arg == 0))) return false;;
+            
+            std::vector<bool> executed(input.size(), false);
+            int acc = 0;
+            for(size_t address = 0; address < input.size();) {
+                auto [_, op, arg] = input[address];
+                if(executed[address]) return false;
+                executed[address] = true;
+                if(address == address_sub) op = (op == JMP) ? NOP : JMP;
+                switch(op){
+                    case ACC: acc+= arg; address++;    break;
+                    case NOP:            address++;    break;
+                    case JMP:            address+=arg; break;
+                    default: throw "Invalid opcode\n";
+                }
             }
+            std::cout << acc << std::endl;
+            return true;
         }
-        std::cout << acc << std::endl;
-        return true;
-    });
+    );
     return 0;
 }

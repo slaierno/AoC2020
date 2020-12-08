@@ -14,23 +14,22 @@ const std::map<std::string, op_enum> op_map {
     {"nop", NOP},
 };
 
-const auto str_to_inst = [](const auto& s) ->inst_t {
+using inst_t = std::pair<op_enum, int>;
+const auto str_to_inst = [](const auto& s) -> inst_t {
     const auto inst = AoC::split(s, ' ');
     return {op_map.at(inst[0]), std::stoi(inst[1])};
 };
-
-using inst_t = std::pair<op_enum, int>;
 
 int main() {
     const auto input = AoC::get_input("input.txt", '\n');
     std::vector<bool> executed(input.size(), false);
     int acc = 0;
     for(size_t address = 0; address < input.size();) {
-        if(!executed[address]) executed[address] = true;
-        else {
+        if(executed[address]) {
             std::cout << acc << std::endl;
             break;
         }
+        executed[address] = true;
         const auto [op, arg] = str_to_inst(input[address]);
         switch(op){
             case ACC: acc+= arg; address++;    break;
