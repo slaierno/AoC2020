@@ -66,12 +66,12 @@ int main() {
     }, "Dummy parallelized version - O(n^2)");
 
     profile([&](){
-        long long sum = 0;
+        long long sum = input[0].second;
         for(size_t i = 0, j = 0; i < input.size() && j < input.size();) {
-            if(sum > weakness) {
+            if (sum < weakness || j == i) {
+                sum += input[++j].second;
+            } else if(sum > weakness) {
                 sum -= input[i++].second;
-            } else if (sum < weakness) {
-                sum += input[j++].second;
             } else {
                 const auto& [min_el, max_el] = std::minmax_element(input.begin() + i, input.begin() + j, [](const auto a, const auto b){ return a.second < b.second; });
                 std::cout << min_el->second + max_el->second << std::endl;
