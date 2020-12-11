@@ -5,15 +5,6 @@
 #include <execution>
 #include <utils.hpp>
 
-constexpr auto profile = [](const auto& block, const std::string_view message = ""){
-    std::cout << message << std::endl;
-    auto start = std::chrono::steady_clock::now();
-    block();
-    auto end = std::chrono::steady_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    std::cout << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
-};
-
 int main() {
     const auto input = AoC::get_input("input.txt", '\n', [i = 0] (auto s) mutable {
         return std::pair<size_t, long long>{i++, std::stoll(s)};
@@ -32,7 +23,7 @@ int main() {
         }
     );
 
-    profile([&](){
+    AoC::profile([&](){
         for(size_t i = 0; i < input.size(); i++) {
             long long sum = input[i].second;
             for(size_t j = i+1; sum < weakness && j < input.size(); j++) {
@@ -46,7 +37,7 @@ int main() {
         }
     }, "Dummy sequenced version, recomputed sums - O(n^2)");
     
-    profile([&](){
+    AoC::profile([&](){
         std::any_of(
             std::execution::par_unseq,
             std::next(std::begin(input), 25), std::end(input),
@@ -65,7 +56,7 @@ int main() {
         );
     }, "Dummy parallelized version - O(n^2)");
 
-    profile([&](){
+    AoC::profile([&](){
         long long sum = input[0].second;
         for(size_t i = 0, j = 0; i < input.size() && j < input.size();) {
             if (sum < weakness || j == i) {
