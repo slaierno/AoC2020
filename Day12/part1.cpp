@@ -19,35 +19,39 @@ const std::map<char, direction_t> direction_map = {
     {'W', WEST },
 };
 
-struct Point {
+struct Ship {
     int x, y;
+    direction_t d;
+
+    void move(direction_t dir, int v) {
+        switch(dir) {
+        case NORTH: y+=v; break;
+        case EAST : x+=v; break;
+        case SOUTH: y-=v; break;
+        case WEST : x-=v; break;
+        default: throw "Invalid input!\n";
+        }
+    }
+    void move(char dir, int v) { return move(direction_map.at(dir), v); }
+    void move(int v) { return move(d, v); }
+
 };
+
 int main() {
     const auto input = AoC::get_input("input.txt", '\n', [](const std::string& s) { 
         return std::pair{s[0], std::stoi(s.substr(1))};
     });
-    auto direction = EAST;
-    Point ship{0,0};
-    const auto move = [&ship](const direction_t dir, const int v) {
-        switch(dir) {
-        case NORTH: ship.y+=v; break;
-        case EAST : ship.x+=v; break;
-        case SOUTH: ship.y-=v; break;
-        case WEST : ship.x-=v; break;
-        default: throw "Invalid input!\n";
-        }
-    };
+    Ship ship{0, 0, EAST};
     for(const auto& [i, v] : input) {
         switch(i) {
-        case 'L':
-        case 'R':
-            direction = static_cast<direction_t>(mod(direction + (i == 'R' ? v/90 : -v/90), 4));
+        case 'L': case 'R':
+            ship.d = static_cast<direction_t>(mod(ship.d + (i == 'R' ? v/90 : -v/90), 4));
             break;
         case 'F':
-            move(direction, v);
+            ship.move(v);
             break;
         case 'N': case 'E': case 'S': case 'W':
-            move(direction_map.at(i), v);
+            ship.move(i, v);
             break;
         default: throw "Invalid input!\n";
         }
