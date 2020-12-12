@@ -6,54 +6,72 @@
 
 constexpr auto mod = [](const int a, const int b) { return (a % b + b) % b; };
 
-struct Point {
+enum direction_t {
+    NORTH = 0,
+    EAST  = 1,
+    SOUTH = 2,
+    WEST  = 3
+};
+const std::map<char, direction_t> direction_map = {
+    {'N', NORTH}, 
+    {'E', EAST },  
+    {'S', SOUTH}, 
+    {'W', WEST },
+};
+
+struct Waypoint {
     int x, y;
+
+    void move(const direction_t dir, const int v) {
+        switch(dir) {
+        case NORTH: y+=v; break;
+        case EAST : x+=v; break;
+        case SOUTH: y-=v; break;
+        case WEST : x-=v; break;
+        default: throw "Invalid input!\n";
+        }
+    }
+    void move(const char dir, const int v) { return move(direction_map.at(dir), v); }
+    
+    void rotate(const char dir, const int deg) {
+        int cos = 0, sin = 0;
+        switch((dir == 'L') ? deg : 360 - deg) {
+            case   0: cos =  1; break;
+            case  90: sin =  1; break;
+            case 180: cos = -1; break;
+            case 270: sin = -1; break;
+        }
+        const auto _x = x * cos - y * sin;
+        const auto _y = x * sin + y * cos;
+        x = _x, y = _y;
+    }
+};
+
+struct Ship {
+    int x, y;
+    Waypoint wp {10,1};
+    void move(const int v) {
+        x += v * wp.x;
+        y += v * wp.y;
+    }
 };
 
 int main() {
     const auto input = AoC::get_input("input.txt", '\n', [](const std::string& s) { 
         return std::pair{s[0], std::stoi(s.substr(1))};
     });
-    Point waypoint{10,1};
-    Point ship{0,0};
-    const auto rotate_wp = [&waypoint](const char dir, int deg) {
-        if(dir == 'R') deg = -deg;
-        if(deg < 0)    deg += 360;
-        int cos = 0, sin = 0;
-        switch(deg) {
-            case   0: cos =  1; break;
-            case  90: sin =  1; break;
-            case 180: cos = -1; break;
-            case 270: sin = -1; break;
-        }
-        waypoint = Point{
-            waypoint.x * cos - waypoint.y * sin, 
-            waypoint.x * sin + waypoint.y * cos
-        };
-    };
-    const auto move_wp = [&waypoint](const char dir, int v) {
-        switch(dir) {
-        case 'N': waypoint.y+=v; break;
-        case 'E': waypoint.x+=v; break;
-        case 'S': waypoint.y-=v; break;
-        case 'W': waypoint.x-=v; break;
-        default: throw "Invalid input!\n";
-        }
-    };
-    const auto move_ship = [&waypoint, &ship](const int v) {
-        ship.x += v * waypoint.x;
-        ship.y += v * waypoint.y;
-    };
+    Ship ship{0,0};
+    Waypoint& waypoint = ship.wp;
     for(const auto& [i, v] : input) {
         switch(i) {
         case 'L': case 'R':
-            rotate_wp(i, v);
+            waypoint.rotate(i, v);
             break;
         case 'N': case 'E': case 'S': case 'W':
-            move_wp(i, v);
+            waypoint.move(i, v);
             break;
         case 'F':
-            move_ship(v);
+            ship.move(v);
             break;
         default: throw "Invalid input!\n";
         }

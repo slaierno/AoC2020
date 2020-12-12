@@ -34,7 +34,10 @@ struct Ship {
     }
     void move(char dir, int v) { return move(direction_map.at(dir), v); }
     void move(int v) { return move(d, v); }
-
+    
+    void turn(char dir, int v) {
+        d = static_cast<direction_t>(mod(d + (dir == 'R' ? v/90 : -v/90), 4));
+    }
 };
 
 int main() {
@@ -45,7 +48,7 @@ int main() {
     for(const auto& [i, v] : input) {
         switch(i) {
         case 'L': case 'R':
-            ship.d = static_cast<direction_t>(mod(ship.d + (i == 'R' ? v/90 : -v/90), 4));
+            ship.turn(i, v);
             break;
         case 'F':
             ship.move(v);
