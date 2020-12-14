@@ -17,13 +17,9 @@ int main() {
         if(s.find("mask") != std::string::npos) {
             auto mask_str = s.substr(s.find('=')+2);
             mask_t mask;
-            for(size_t i = 0; i < mask_str.length(); i++) {
+            for(size_t i = 0; i < mask_str.length(); i++) 
                 if(mask_str[i] != 'X') mask.emplace_back(35 - i, mask_str[i] == '1');
-            }
-            return inst_t {
-                std::in_place_type<mask_t>,
-                mask
-            };
+            return inst_t { std::in_place_type<mask_t>, mask };
         } else {
             return inst_t {
                 std::in_place_type<memset_t>,
@@ -36,20 +32,13 @@ int main() {
     mask_t mask;
     for(const auto& inst : program) {
         switch(inst.index()) {
-        case 0: //mask_t
-        {
-            mask = std::get<mask_t>(inst);
-        }
-        break;
-        case 1: //memset_t
-        {
+        case 0: mask = std::get<mask_t>(inst); break;
+        case 1: {
             const auto& [address, value] = std::get<memset_t>(inst);
             mem[address] = value;
-            for(const auto& [pos, bit] : mask) {
+            for(const auto& [pos, bit] : mask)
                 mem[address] ^= (-(uint64_t)bit ^ mem[address]) & (1ULL << pos);
-            }
-        }
-        break;
+        } break;
         default: throw "Invalid alternative?!\n";
         }
     }
