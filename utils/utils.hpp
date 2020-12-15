@@ -1,7 +1,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
-#include <range/v3/all.hpp>
+#include <chrono>
 
 namespace AoC{
     constexpr auto profile = [](const auto& block, const std::string_view message = ""){
@@ -13,8 +13,6 @@ namespace AoC{
         std::cout << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
     };
 
-    namespace views = ranges::views;
-
     auto idem_return = [](const std::string& s) -> std::string {return s;};
 
     template<typename L = decltype(idem_return)>
@@ -22,7 +20,7 @@ namespace AoC{
                L l = idem_return) {
         std::vector<decltype(l(""))> ret;
         for(size_t pos = 0; pos != std::string::npos;) {
-            const auto it = ranges::min_element(delimiters, [&to_split](auto a, auto b){ return to_split.find(a) < to_split.find(b);});
+            const auto it = std::min_element(delimiters.begin(), delimiters.end(), [&to_split](auto a, auto b){ return to_split.find(a) < to_split.find(b);});
             pos = to_split.find(*it);
             const auto token = to_split.substr(0,pos);
             if(token.length() > 0) ret.push_back(l(token));
