@@ -27,21 +27,19 @@ int main() {
         const auto& rules_string = input[0];
         const auto& my_ticket_string = input[1];
         const auto& tickets_string = input[2];
-
-        const std::vector<rule_t> rules = AoC::split(rules_string, '\n', [](const auto& s) {
-            const auto rules_str = AoC::split(s, ": ");
-            const auto ranges_str = AoC::split(rules_str[1], ' ');
-            const auto make_range = [](const auto& str) {
-                const auto range_vec = AoC::split(str, '-', [](const auto& s) {return std::stoul(s);});
-                return range_t {range_vec[0], range_vec[1]};
-            };
-            return rule_t{rules_str[0], make_range(ranges_str[0]), make_range(ranges_str[2])};
-        });
         const auto make_ticket = [](const auto& s) {
             return AoC::split(s, ',', [](const auto& s) {return std::stoul(s);});
         };
-        return input_t{
-            rules,
+        return input_t {
+            AoC::split(rules_string, '\n', [](const auto& s) {
+                const auto rules_str = AoC::split(s, ": ");
+                const auto ranges_str = AoC::split(rules_str[1], ' ');
+                const auto make_range = [](const auto& str) {
+                    const auto range_vec = AoC::split(str, '-', [](const auto& s) {return std::stoul(s);});
+                    return range_t {range_vec[0], range_vec[1]};
+                };
+                return rule_t{rules_str[0], make_range(ranges_str[0]), make_range(ranges_str[2])};
+            }),
             make_ticket(AoC::split(my_ticket_string, '\n')[1]),
             AoC::split(AoC::split(tickets_string, ":\n")[1], '\n', make_ticket),
         };
@@ -61,21 +59,24 @@ int main() {
         valid_tickets.push_back(my_ticket);
         return valid_tickets;
     }();
-    const auto remove_idx = [&rule_matrix](const auto idx, const auto& self) -> void{
-        for(auto& position : rule_matrix) {
-            if (position.size() == 1) continue;
-            if (auto found = position.find(idx); found != position.end()) {
-                position.erase(found);
-                if(position.size() == 1) self(position.begin()->first, self);
+    const auto remove_idx = [&rule_matrix](const auto idx){
+        const auto l_impl = [&](const auto idx, const auto& self) -> void {
+            for(auto& position : rule_matrix) {
+                if (position.size() == 1) continue;
+                if (auto found = position.find(idx); found != position.end()) {
+                    position.erase(found);
+                    if(position.size() == 1) self(position.begin()->first, self);
+                }
             }
-        }
+        };
+        return l_impl(idx, l_impl);
     };
     for(const auto& t : valid_tickets) {
         for(size_t i = 0; i < t.size(); i++) {
             const auto& v = t[i];
             auto& rules = rule_matrix[i];
             std::erase_if(rules, [&v](const auto& rule){ return !in_rule(v, rule.second); });
-            if(rules.size() == 1) remove_idx(rules.begin()->first, remove_idx);
+            if(rules.size() == 1) remove_idx(rules.begin()->first);
         }
     }
     std::cout << std::accumulate(my_ticket.begin(), my_ticket.end(), 1ULL, [&, i = 0](const auto a, const auto v) mutable {
