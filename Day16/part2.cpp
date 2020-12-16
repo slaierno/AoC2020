@@ -12,8 +12,8 @@ using range_t = std::pair<long unsigned, long unsigned>;
 using rule_t = std::tuple<std::string, range_t, range_t>;
 using input_t = std::tuple<std::vector<rule_t>, ticket_t, std::vector<ticket_t>>;
 using rule_map_t = std::map<size_t, rule_t>;
-const auto in_rule = [](const auto v, const rule_t& r) { 
-    const auto in_range = [](const auto v, const range_t& r) { 
+constexpr auto in_rule = [](const auto v, const rule_t& r) { 
+    constexpr auto in_range = [](const auto v, const range_t& r) { 
         const auto& [rm, rM] = r;
         return rm <= v&&v <=rM;
     };
