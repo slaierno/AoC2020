@@ -6,6 +6,8 @@
 #include <map>
 #include <set>
 #include <ranges>
+#include <atomic>
+#include <execution>
 
 struct point_t {
     int x, y, z, w;
@@ -31,17 +33,17 @@ int main() {
     }
     for(int i = 0; i < 6; i++) {
         std::map<point_t, unsigned> neighbours_map;
-        std::set<point_t> new_cubes;
-        for(const auto& c : cubes) {
+        for(const auto& c : std::as_const(cubes)) {
             for(const auto& n : c.neighbours()) {
                 neighbours_map[n]++;
             }
         }
-        for(const auto& c : cubes) {
+        std::set<point_t> new_cubes;
+        for(const auto& c : std::as_const(cubes)) {
             if(neighbours_map[c] == 2 || neighbours_map[c] == 3) new_cubes.insert(c);
             neighbours_map.erase(c);
         }
-        for(const auto& [n, count] : neighbours_map) {
+        for(const auto& [n, count] : std::as_const(neighbours_map)) {
             if(count == 3) new_cubes.insert(n);
         }
         cubes.swap(new_cubes);
