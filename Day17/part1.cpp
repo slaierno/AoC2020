@@ -10,6 +10,15 @@
 struct point_t {
     int x, y, z;
     auto operator<=>(const point_t&) const = default;
+    constexpr auto neighbours() const {
+        constexpr auto nbh = [](const auto x) {return std::views::iota(x-1) | std::views::take(3);};
+        std::array<point_t, 26> neighbours;
+        size_t i = 0;
+        for(const int x : nbh(x)) for(const int y : nbh(y))
+        for(const int z : nbh(z))
+            if(const point_t nbp = {x,y,z}; nbp != *this) neighbours[i++] = nbp;
+        return neighbours;
+    }
 };
 
 int main() {
@@ -20,18 +29,11 @@ int main() {
             if(input_lines[x][y] == '#') cubes.emplace(x,y,0);
         }
     }
-    const auto neighbours = [](const point_t& center) {
-        constexpr auto nbh = [](const auto x) {return std::views::iota(x-1) | std::views::take(3);};
-        std::set<point_t> neighbours;
-        for(int x : nbh(center.x)) for(int y : nbh(center.y)) for(int z : nbh(center.z))
-            if(auto nbp = point_t{x,y,z}; nbp != center) neighbours.insert(nbp);
-        return neighbours;
-    };
     for(int i = 0; i < 6; i++) {
         std::map<point_t, unsigned> neighbours_map;
         std::set<point_t> new_cubes;
         for(const auto& c : cubes) {
-            for(const auto& n : neighbours(c)) {
+            for(const auto& n : c.neighbours()) {
                 neighbours_map[n]++;
             }
         }
