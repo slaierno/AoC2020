@@ -9,15 +9,7 @@
 
 struct point_t {
     int x, y, z, w;
-    bool operator<(const point_t& other) const {
-        if (x != other.x) return (x < other.x);
-        if (y != other.y) return (y < other.y);
-        if (z != other.z) return (z < other.z);
-        return (w < other.w);
-    }
-    bool operator!=(const point_t& other) const {
-        return (x != other.x) || (y != other.y) || (z != other.z) || (w != other.w);
-    }
+    auto operator<=>(const point_t&) const = default;
 };
 
 int main() {
