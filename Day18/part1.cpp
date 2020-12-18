@@ -68,9 +68,8 @@ auto to_rpn(std::string_view str) {
 }
 
 long long calc(std::string_view str) {
-    auto rpn = to_rpn(str);
     std::stack<long long> stack;
-    for(const auto ch : rpn) {
+    for(const auto ch : to_rpn(str)) {
         switch(token_type(ch)) {
         case PLUS:
         case TIMES: {
@@ -86,6 +85,7 @@ long long calc(std::string_view str) {
     }
     return stack.top();
 }
+
 int main() {
     const auto input = AoC::get_input("input.txt", {'\n'}, [](std::string str) {
         str.erase(remove_if(str.begin(), str.end(), isspace), str.end());

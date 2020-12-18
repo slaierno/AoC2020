@@ -6,11 +6,12 @@
 namespace AoC{
     constexpr auto profile = [](const auto& block, const std::string_view message = ""){
         std::cout << message << std::endl;
-        auto start = std::chrono::steady_clock::now();
-        block();
-        auto end = std::chrono::steady_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end-start;
+        const auto start = std::chrono::steady_clock::now();
+        const auto ret = block();
+        const auto end = std::chrono::steady_clock::now();
+        const std::chrono::duration<double> elapsed_seconds = end - start;
         std::cout << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
+        return ret;
     };
 
     auto idem_return = [](const std::string& s) -> std::string {return s;};
